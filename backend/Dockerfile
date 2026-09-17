@@ -20,6 +20,8 @@ ENV DOTNET_gcServer=0
 # vừa ghi vừa thực thi (W^X) mà CLR JIT mặc định cần — gây crash SIGSEGV im lặng,
 # không log exception nào. Tắt tối ưu này để JIT hoạt động ổn định trên môi trường đó.
 ENV DOTNET_EnableWriteXorExecute=0
+# Ép GC dọn rác sớm thay vì cố cấp phát tới sát giới hạn cgroup rồi bị kill/crash.
+ENV DOTNET_GCHeapHardLimit=12000000
 EXPOSE 8080
 
 ENTRYPOINT ["dotnet", "API.dll"]
