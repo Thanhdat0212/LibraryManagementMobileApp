@@ -10,4 +10,5 @@ export const borrowRequestsApi = {
   approve: (id: number) => axiosClient.post<BorrowRequest>(`/borrowrequests/${id}/approve`).then((res) => res.data),
   reject: (id: number, reason?: string) =>
     axiosClient.post<BorrowRequest>(`/borrowrequests/${id}/reject`, { reason }).then((res) => res.data),
+  cancel: (id: number) => axiosClient.post<BorrowRequest>(`/borrowrequests/${id}/cancel`).then((res) => res.data),
 };

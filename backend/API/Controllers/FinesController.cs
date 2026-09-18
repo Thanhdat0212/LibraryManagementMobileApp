@@ -41,6 +41,11 @@ public class FinesController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Pay(int id) => Ok(await _fineService.PayAsync(id));
 
+    // Admin miễn khoản phạt (vd. thông cảm, sai sót) mà không cần thu tiền.
+    [HttpPost("{id:int}/waive")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Waive(int id) => Ok(await _fineService.WaiveAsync(id));
+
     private int GetCurrentUserId()
     {
         var value = User.FindFirstValue(ClaimTypes.NameIdentifier)

@@ -62,6 +62,12 @@ public class BorrowRequestsController : ControllerBase
     public async Task<IActionResult> Reject(int id, [FromBody] RejectBorrowRequestDto dto) =>
         Ok(await _borrowRequestService.RejectAsync(id, GetCurrentUserId(), dto));
 
+    // Member tự hủy yêu cầu của chính mình khi còn đang chờ duyệt.
+    [HttpPost("{id:int}/cancel")]
+    [Authorize(Roles = "Member")]
+    public async Task<IActionResult> Cancel(int id) =>
+        Ok(await _borrowRequestService.CancelAsync(id, GetCurrentUserId()));
+
     private int GetCurrentUserId()
     {
         var value = User.FindFirstValue(ClaimTypes.NameIdentifier)

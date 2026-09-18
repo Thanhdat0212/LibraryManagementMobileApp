@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { booksApi } from "../../api/booksApi";
 import { borrowRequestsApi } from "../../api/borrowRequestsApi";
 import { categoriesApi } from "../../api/categoriesApi";
@@ -117,20 +118,22 @@ export default function CatalogPage() {
               const alreadyRequested = requestedBookIds.includes(book.id);
               return (
                 <div key={book.id} className="rounded-lg border border-slate-200 bg-white p-3">
-                  {book.coverImageUrl ? (
-                    <div className="mb-2 aspect-[2/3] w-full overflow-hidden rounded bg-slate-100">
-                      <img
-                        src={book.coverImageUrl}
-                        alt={book.title}
-                        className="h-full w-full object-cover object-top"
-                      />
-                    </div>
-                  ) : (
-                    <div className="mb-2 flex aspect-[2/3] w-full items-center justify-center rounded bg-slate-100 text-xs text-slate-400">
-                      Không có ảnh bìa
-                    </div>
-                  )}
-                  <p className="line-clamp-2 text-sm font-medium text-slate-900">{book.title}</p>
+                  <Link to={`/catalog/${book.id}`}>
+                    {book.coverImageUrl ? (
+                      <div className="mb-2 aspect-[2/3] w-full overflow-hidden rounded bg-slate-100">
+                        <img
+                          src={book.coverImageUrl}
+                          alt={book.title}
+                          className="h-full w-full object-cover object-top"
+                        />
+                      </div>
+                    ) : (
+                      <div className="mb-2 flex aspect-[2/3] w-full items-center justify-center rounded bg-slate-100 text-xs text-slate-400">
+                        Không có ảnh bìa
+                      </div>
+                    )}
+                    <p className="line-clamp-2 text-sm font-medium text-slate-900 hover:text-indigo-600">{book.title}</p>
+                  </Link>
                   <p className="mt-0.5 text-xs text-slate-500">{book.authorNames.join(", ") || "Chưa rõ tác giả"}</p>
                   <p className="mt-1 text-xs text-slate-400">
                     {book.categoryName} · {book.publishedYear}

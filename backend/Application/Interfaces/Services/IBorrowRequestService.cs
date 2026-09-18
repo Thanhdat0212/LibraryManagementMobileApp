@@ -11,4 +11,5 @@ public interface IBorrowRequestService
     Task<BorrowRequestDto> CreateAsync(int userId, CreateBorrowRequestDto dto);
     Task<BorrowRequestDto> ApproveAsync(int id, int processedByUserId);
     Task<BorrowRequestDto> RejectAsync(int id, int processedByUserId, RejectBorrowRequestDto dto);
+    Task<BorrowRequestDto> CancelAsync(int id, int userId);
 }

@@ -105,6 +105,13 @@ public class BorrowRequestService : IBorrowRequestService
         if (request.Status != BorrowRequestStatus.Pending)
             throw new InvalidOperationException("Yêu cầu này đã được xử lý trước đó.");
 
+        if (await _fineRepository.HasUnpaidFineAsync(request.UserId))
+            throw new InvalidOperationException("Người dùng còn khoản phạt chưa thanh toán, không thể duyệt yêu cầu này.");
+
+        var activeCount = await _borrowRecordRepository.CountActiveByUserIdAsync(request.UserId);
+        if (activeCount >= _policy.MaxActiveBorrows)
+            throw new InvalidOperationException($"Người dùng đã đạt giới hạn {_policy.MaxActiveBorrows} sách được mượn đồng thời.");
+
         var copy = await _bookCopyRepository.GetFirstAvailableByBookIdAsync(request.BookId)
             ?? throw new InvalidOperationException("Hiện không có bản sao nào khả dụng cho sách này.");
 
@@ -146,6 +153,26 @@ public class BorrowRequestService : IBorrowRequestService
         request.ProcessedByUserId = processedByUserId;
         if (!string.IsNullOrWhiteSpace(dto.Reason))
             request.Note = dto.Reason;
+
+        _borrowRequestRepository.Update(request);
+        await _unitOfWork.SaveChangesAsync();
+
+        return _mapper.Map<BorrowRequestDto>(request);
+    }
+
+    public async Task<BorrowRequestDto> CancelAsync(int id, int userId)
+    {
+        var request = await _borrowRequestRepository.GetByIdWithDetailsAsync(id)
+            ?? throw new InvalidOperationException("Không tìm thấy yêu cầu mượn sách.");
+
+        if (request.UserId != userId)
+            throw new InvalidOperationException("Bạn không thể hủy yêu cầu của người khác.");
+
+        if (request.Status != BorrowRequestStatus.Pending)
+            throw new InvalidOperationException("Chỉ có thể hủy yêu cầu đang chờ duyệt.");
+
+        request.Status = BorrowRequestStatus.Cancelled;
+        request.ProcessedAt = DateTime.UtcNow;
 
         _borrowRequestRepository.Update(request);
         await _unitOfWork.SaveChangesAsync();

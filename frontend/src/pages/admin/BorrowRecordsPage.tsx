@@ -41,6 +41,9 @@ export default function BorrowRecordsPage() {
   const [returnTarget, setReturnTarget] = useState<BorrowRecord | null>(null);
   const [isReturning, setIsReturning] = useState(false);
 
+  const [search, setSearch] = useState("");
+  const [renewingId, setRenewingId] = useState<number | null>(null);
+
   async function loadAll() {
     setIsLoading(true);
     setListError(null);
@@ -110,6 +113,25 @@ export default function BorrowRecordsPage() {
     }
   }
 
+  async function handleRenew(record: BorrowRecord) {
+    setRenewingId(record.id);
+    setListError(null);
+    try {
+      await borrowRecordsApi.renew(record.id);
+      await loadAll();
+    } catch (err) {
+      setListError(getErrorMessage(err, "Không gia hạn được phiếu mượn này."));
+    } finally {
+      setRenewingId(null);
+    }
+  }
+
+  const filteredRecords = records.filter((r) => {
+    const q = search.trim().toLowerCase();
+    if (!q) return true;
+    return r.bookTitle.toLowerCase().includes(q) || r.userName.toLowerCase().includes(q);
+  });
+
   const columns: Column<BorrowRecord>[] = [
     { header: "Sách", render: (r) => <span className="font-medium text-slate-900">{r.bookTitle}</span> },
     { header: "Độc giả", render: (r) => r.userName },
@@ -128,9 +150,14 @@ export default function BorrowRecordsPage() {
       className: "text-right",
       render: (r) =>
         r.status === "Borrowing" ? (
-          <Button variant="secondary" onClick={() => setReturnTarget(r)}>
-            Xác nhận trả
-          </Button>
+          <div className="flex justify-end gap-2">
+            <Button variant="secondary" isLoading={renewingId === r.id} onClick={() => handleRenew(r)}>
+              Gia hạn ({r.renewalCount} lần)
+            </Button>
+            <Button variant="secondary" onClick={() => setReturnTarget(r)}>
+              Xác nhận trả
+            </Button>
+          </div>
         ) : null,
     },
   ];
@@ -143,8 +170,17 @@ export default function BorrowRecordsPage() {
         actions={<Button onClick={openCreateForm}>+ Lập phiếu mượn</Button>}
       />
       <ErrorBanner message={listError} />
+      <div className="mb-3 max-w-xs">
+        <Input placeholder="Tìm theo tên sách hoặc độc giả..." value={search} onChange={(e) => setSearch(e.target.value)} />
+      </div>
       <div className="mt-3">
-        <DataTable columns={columns} rows={records} rowKey={(r) => r.id} isLoading={isLoading} emptyMessage="Chưa có phiếu mượn nào." />
+        <DataTable
+          columns={columns}
+          rows={filteredRecords}
+          rowKey={(r) => r.id}
+          isLoading={isLoading}
+          emptyMessage="Chưa có phiếu mượn nào."
+        />
       </div>
 
       <Modal open={isFormOpen} title="Lập phiếu mượn" onClose={() => setIsFormOpen(false)}>

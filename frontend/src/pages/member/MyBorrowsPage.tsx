@@ -30,6 +30,7 @@ export default function MyBorrowsPage() {
   const [error, setError] = useState<string | null>(null);
   const [renewingId, setRenewingId] = useState<number | null>(null);
   const [renewMessage, setRenewMessage] = useState<string | null>(null);
+  const [cancellingId, setCancellingId] = useState<number | null>(null);
 
   function load() {
     setIsLoading(true);
@@ -56,6 +57,20 @@ export default function MyBorrowsPage() {
       setRenewMessage(getErrorMessage(err, "Không gia hạn được phiếu mượn này."));
     } finally {
       setRenewingId(null);
+    }
+  }
+
+  async function handleCancelRequest(request: BorrowRequest) {
+    setCancellingId(request.id);
+    setRenewMessage(null);
+    try {
+      await borrowRequestsApi.cancel(request.id);
+      setRenewMessage(`Đã hủy yêu cầu mượn "${request.bookTitle}".`);
+      load();
+    } catch (err) {
+      setRenewMessage(getErrorMessage(err, "Không hủy được yêu cầu mượn này."));
+    } finally {
+      setCancellingId(null);
     }
   }
 
@@ -99,10 +114,20 @@ export default function MyBorrowsPage() {
       {requests.length > 0 && (
         <div className="mb-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
           <p className="font-medium">Yêu cầu mượn đang chờ duyệt ({requests.length}):</p>
-          <ul className="mt-1 list-inside list-disc">
+          <ul className="mt-1 space-y-1">
             {requests.map((r) => (
-              <li key={r.id}>
-                {r.bookTitle} — {requestStatusLabel[r.status]}
+              <li key={r.id} className="flex list-none items-center justify-between gap-2">
+                <span>
+                  {r.bookTitle} — {requestStatusLabel[r.status]}
+                </span>
+                <Button
+                  variant="ghost"
+                  className="!px-2 !py-1 text-red-600 hover:bg-red-50"
+                  isLoading={cancellingId === r.id}
+                  onClick={() => handleCancelRequest(r)}
+                >
+                  Hủy yêu cầu
+                </Button>
               </li>
             ))}
           </ul>

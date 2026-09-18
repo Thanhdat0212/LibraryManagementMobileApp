@@ -9,4 +9,5 @@ public interface IFineService
     Task<IEnumerable<FineDto>> GetByUserIdAsync(int userId);
     Task<FineDto?> GetByIdAsync(int id);
     Task<FineDto> PayAsync(int id);
+    Task<FineDto> WaiveAsync(int id);
 }

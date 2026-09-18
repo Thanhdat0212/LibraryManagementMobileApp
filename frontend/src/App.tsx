@@ -18,6 +18,7 @@ import FinesPage from "./pages/admin/FinesPage";
 import DashboardPage from "./pages/admin/DashboardPage";
 import UsersPage from "./pages/admin/UsersPage";
 import CatalogPage from "./pages/member/CatalogPage";
+import BookDetailPage from "./pages/member/BookDetailPage";
 import MyBorrowsPage from "./pages/member/MyBorrowsPage";
 
 export default function App() {
@@ -47,6 +48,7 @@ export default function App() {
           <Route element={<ProtectedRoute allowedRoles={["Member"]} />}>
             <Route element={<MemberLayout />}>
               <Route path="/catalog" element={<CatalogPage />} />
+              <Route path="/catalog/:id" element={<BookDetailPage />} />
               <Route path="/my-borrows" element={<MyBorrowsPage />} />
             </Route>
           </Route>

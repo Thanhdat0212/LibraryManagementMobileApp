@@ -18,9 +18,9 @@ export default function AdminLayout() {
   const { user, logout } = useAuth();
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
-      <aside className="flex w-60 shrink-0 flex-col border-r border-slate-200 bg-white">
-        <div className="border-b border-slate-200 px-5 py-4">
+    <div className="flex h-screen overflow-hidden bg-slate-50">
+      <aside className="flex w-60 shrink-0 flex-col overflow-y-auto border-r border-slate-200 bg-white">
+        <div className="sticky top-0 z-10 border-b border-slate-200 bg-white px-5 py-4">
           <p className="text-sm font-semibold text-slate-900">Thư viện</p>
           <p className="text-xs text-slate-500">Trang quản trị</p>
         </div>
@@ -39,7 +39,7 @@ export default function AdminLayout() {
             </NavLink>
           ))}
         </nav>
-        <div className="border-t border-slate-200 p-3">
+        <div className="sticky bottom-0 border-t border-slate-200 bg-white p-3">
           <p className="truncate px-1 text-sm font-medium text-slate-700">{user?.fullName}</p>
           <p className="truncate px-1 text-xs text-slate-400">{user?.email}</p>
           <button
@@ -51,7 +51,7 @@ export default function AdminLayout() {
           </button>
         </div>
       </aside>
-      <main className="flex-1 overflow-x-hidden p-6">
+      <main className="flex-1 overflow-y-auto overflow-x-hidden p-6">
         <Outlet />
       </main>
     </div>

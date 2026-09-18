@@ -53,4 +53,19 @@ public class FineService : IFineService
 
         return _mapper.Map<FineDto>(fine);
     }
+
+    public async Task<FineDto> WaiveAsync(int id)
+    {
+        var fine = await _fineRepository.GetByIdWithDetailsAsync(id)
+            ?? throw new InvalidOperationException("Không tìm thấy khoản phạt.");
+
+        if (fine.Status != FineStatus.Unpaid)
+            throw new InvalidOperationException("Chỉ có thể miễn khoản phạt đang chưa thanh toán.");
+
+        fine.Status = FineStatus.Waived;
+        _fineRepository.Update(fine);
+        await _unitOfWork.SaveChangesAsync();
+
+        return _mapper.Map<FineDto>(fine);
+    }
 }
