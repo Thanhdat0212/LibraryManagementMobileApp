@@ -1,4 +1,3 @@
-using Application.DTOs.User;
 using Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -28,8 +27,4 @@ public class UsersController : ControllerBase
     [HttpPut("{id:int}/unlock")]
     public async Task<IActionResult> Unlock(int id) =>
         await _userService.SetLockedAsync(id, false) ? NoContent() : NotFound();
-
-    [HttpPut("{id:int}/role")]
-    public async Task<IActionResult> ChangeRole(int id, [FromBody] UpdateUserRoleDto dto) =>
-        await _userService.ChangeRoleAsync(id, dto) ? NoContent() : NotFound();
 }

@@ -43,19 +43,6 @@ export default function UsersPage() {
     }
   }
 
-  async function handleToggleRole(user: User) {
-    setProcessingId(user.id);
-    setError(null);
-    try {
-      await usersApi.changeRole(user.id, user.role === "Admin" ? "Member" : "Admin");
-      load();
-    } catch (err) {
-      setError(getErrorMessage(err, "Không đổi được vai trò người dùng."));
-    } finally {
-      setProcessingId(null);
-    }
-  }
-
   const columns: Column<User>[] = [
     { header: "Họ tên", render: (u) => <span className="font-medium text-slate-900">{u.fullName}</span> },
     { header: "Email", render: (u) => u.email },
@@ -72,9 +59,6 @@ export default function UsersPage() {
       className: "text-right",
       render: (u) => (
         <div className="flex justify-end gap-2">
-          <Button variant="secondary" isLoading={processingId === u.id} onClick={() => handleToggleRole(u)}>
-            {u.role === "Admin" ? "Hạ quyền" : "Nâng Admin"}
-          </Button>
           <Button
             variant={u.isLocked ? "secondary" : "danger"}
             isLoading={processingId === u.id}

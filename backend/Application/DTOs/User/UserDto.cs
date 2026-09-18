@@ -9,8 +9,3 @@ public class UserDto
     public string Role { get; set; } = string.Empty;
     public bool IsLocked { get; set; }
 }
-
-public class UpdateUserRoleDto
-{
-    public string Role { get; set; } = string.Empty;
-}

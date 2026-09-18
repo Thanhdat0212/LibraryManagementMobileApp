@@ -3,7 +3,6 @@ using Application.Interfaces;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using AutoMapper;
-using Domain.Enums;
 
 namespace Infrastructure.Services;
 
@@ -32,20 +31,6 @@ public class UserService : IUserService
         if (user == null) return false;
 
         user.IsLocked = isLocked;
-        _userRepository.Update(user);
-        await _unitOfWork.SaveChangesAsync();
-        return true;
-    }
-
-    public async Task<bool> ChangeRoleAsync(int id, UpdateUserRoleDto dto)
-    {
-        if (!Enum.TryParse<UserRole>(dto.Role, out var role))
-            throw new InvalidOperationException("Vai trò không hợp lệ.");
-
-        var user = await _userRepository.GetByIdAsync(id);
-        if (user == null) return false;
-
-        user.Role = role;
         _userRepository.Update(user);
         await _unitOfWork.SaveChangesAsync();
         return true;
