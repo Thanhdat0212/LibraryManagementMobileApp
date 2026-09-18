@@ -8,12 +8,17 @@ import type { Book } from "../../types/book";
 import type { Category } from "../../types/category";
 import Button from "../../components/ui/Button";
 import EmptyState from "../../components/ui/EmptyState";
-import ErrorBanner from "../../components/ui/ErrorBanner";
+import Notice from "../../components/ui/Notice";
 import Input from "../../components/ui/Input";
 import Pagination from "../../components/ui/Pagination";
 import PageHeader from "../../components/ui/PageHeader";
 import Select from "../../components/ui/Select";
 import Spinner from "../../components/ui/Spinner";
+
+interface RequestFeedback {
+  tone: "success" | "danger";
+  text: string;
+}
 
 const PAGE_SIZE = 12;
 
@@ -30,7 +35,7 @@ export default function CatalogPage() {
 
   const [requestingBookId, setRequestingBookId] = useState<number | null>(null);
   const [requestedBookIds, setRequestedBookIds] = useState<number[]>([]);
-  const [requestMessage, setRequestMessage] = useState<string | null>(null);
+  const [requestFeedback, setRequestFeedback] = useState<RequestFeedback | null>(null);
 
   useEffect(() => {
     categoriesApi.getAll().then(setCategories).catch(() => undefined);
@@ -69,13 +74,13 @@ export default function CatalogPage() {
 
   async function handleRequestBorrow(book: Book) {
     setRequestingBookId(book.id);
-    setRequestMessage(null);
+    setRequestFeedback(null);
     try {
       await borrowRequestsApi.create({ bookId: book.id });
       setRequestedBookIds((prev) => [...prev, book.id]);
-      setRequestMessage(`Đã gửi yêu cầu mượn "${book.title}". Vui lòng chờ thủ thư duyệt.`);
+      setRequestFeedback({ tone: "success", text: `Đã gửi yêu cầu mượn "${book.title}". Vui lòng chờ thủ thư duyệt.` });
     } catch (err) {
-      setRequestMessage(getErrorMessage(err, "Không gửi được yêu cầu mượn sách."));
+      setRequestFeedback({ tone: "danger", text: getErrorMessage(err, "Không gửi được yêu cầu mượn sách.") });
     } finally {
       setRequestingBookId(null);
     }
@@ -84,12 +89,8 @@ export default function CatalogPage() {
   return (
     <div>
       <PageHeader title="Danh mục sách" description="Tìm sách và gửi yêu cầu mượn, thủ thư sẽ duyệt và giao sách tại quầy." />
-      <ErrorBanner message={error} />
-      {requestMessage && (
-        <div className="mb-3 rounded-md border border-indigo-200 bg-indigo-50 px-3 py-2 text-sm text-indigo-700">
-          {requestMessage}
-        </div>
-      )}
+      <Notice tone="danger" message={error} className="mb-3" />
+      {requestFeedback && <Notice tone={requestFeedback.tone} message={requestFeedback.text} className="mb-3" />}
 
       <div className="mb-4 flex flex-wrap gap-3">
         <div className="min-w-56 flex-1">

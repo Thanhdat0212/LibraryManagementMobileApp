@@ -8,10 +8,11 @@ import Badge from "../../components/ui/Badge";
 import Button from "../../components/ui/Button";
 import ConfirmDialog from "../../components/ui/ConfirmDialog";
 import DataTable, { type Column } from "../../components/ui/DataTable";
-import ErrorBanner from "../../components/ui/ErrorBanner";
+import Notice from "../../components/ui/Notice";
 import Input from "../../components/ui/Input";
 import Modal from "../../components/ui/Modal";
 import PageHeader from "../../components/ui/PageHeader";
+import RowActions from "../../components/ui/RowActions";
 import Select from "../../components/ui/Select";
 
 const statusTone: Record<BookCopyStatus, "green" | "blue" | "red" | "amber"> = {
@@ -128,16 +129,7 @@ export default function BookCopiesPage() {
     {
       header: "",
       className: "text-right",
-      render: (c) => (
-        <div className="flex justify-end gap-2">
-          <Button variant="secondary" onClick={() => openEditForm(c)}>
-            Sửa
-          </Button>
-          <Button variant="danger" onClick={() => setDeleteTarget(c)}>
-            Xóa
-          </Button>
-        </div>
-      ),
+      render: (c) => <RowActions onEdit={() => openEditForm(c)} onDelete={() => setDeleteTarget(c)} />,
     },
   ];
 
@@ -148,7 +140,7 @@ export default function BookCopiesPage() {
         description="Quản lý các bản sao vật lý của từng đầu sách."
         actions={<Button onClick={openCreateForm}>+ Thêm bản sao</Button>}
       />
-      <ErrorBanner message={listError} />
+      <Notice tone="danger" message={listError} className="mb-3" />
       <div className="mt-3">
         <DataTable columns={columns} rows={copies} rowKey={(c) => c.id} isLoading={isLoading} emptyMessage="Chưa có bản sao nào." />
       </div>
@@ -183,7 +175,7 @@ export default function BookCopiesPage() {
               ))}
             </Select>
           )}
-          <ErrorBanner message={formError} />
+          <Notice tone="danger" message={formError} />
           <div className="mt-1 flex justify-end gap-2">
             <Button type="button" variant="secondary" onClick={() => setIsFormOpen(false)}>
               Hủy

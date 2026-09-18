@@ -5,8 +5,9 @@ import type { Fine, FineStatus } from "../../types/fine";
 import Badge from "../../components/ui/Badge";
 import Button from "../../components/ui/Button";
 import DataTable, { type Column } from "../../components/ui/DataTable";
-import ErrorBanner from "../../components/ui/ErrorBanner";
+import Notice from "../../components/ui/Notice";
 import PageHeader from "../../components/ui/PageHeader";
+import StatusTabs from "../../components/ui/StatusTabs";
 import { formatCurrency } from "../../utils/formatCurrency";
 import { formatDate } from "../../utils/formatDate";
 
@@ -103,21 +104,8 @@ export default function FinesPage() {
   return (
     <div>
       <PageHeader title="Tiền phạt" description="Danh sách khoản phạt trả trễ, thu tại quầy hoặc miễn khi cần." />
-      <div className="mb-4 flex gap-1">
-        {statusTabs.map((tab) => (
-          <button
-            key={tab.value}
-            type="button"
-            onClick={() => setStatus(tab.value)}
-            className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-              status === tab.value ? "bg-indigo-50 text-indigo-700" : "text-slate-600 hover:bg-slate-100"
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-      <ErrorBanner message={error} />
+      <StatusTabs tabs={statusTabs} value={status} onChange={setStatus} />
+      <Notice tone="danger" message={error} className="mb-3" />
       <div className="mt-3">
         <DataTable
           columns={columns}

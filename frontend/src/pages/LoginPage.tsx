@@ -1,10 +1,11 @@
 import { useState, type FormEvent } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
+import { BookMarked } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { getErrorMessage } from "../api/axiosClient";
 import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
-import ErrorBanner from "../components/ui/ErrorBanner";
+import Notice from "../components/ui/Notice";
 
 export default function LoginPage() {
   const { user, login } = useAuth();
@@ -35,8 +36,13 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
       <div className="w-full max-w-sm rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-        <h1 className="text-lg font-semibold text-slate-900">Đăng nhập</h1>
-        <p className="mt-1 text-sm text-slate-500">Hệ thống quản lý thư viện</p>
+        <div className="flex flex-col items-center text-center">
+          <span className="flex h-11 w-11 items-center justify-center rounded-full bg-indigo-50 text-indigo-600">
+            <BookMarked className="h-5 w-5" aria-hidden="true" />
+          </span>
+          <h1 className="mt-3 text-lg font-semibold text-slate-900">Đăng nhập</h1>
+          <p className="mt-1 text-sm text-slate-500">Hệ thống quản lý thư viện</p>
+        </div>
 
         <form onSubmit={handleSubmit} className="mt-5 flex flex-col gap-3">
           <Input
@@ -57,7 +63,7 @@ export default function LoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          <ErrorBanner message={error} />
+          <Notice tone="danger" message={error} />
           <Button type="submit" isLoading={isSubmitting} className="mt-1 w-full">
             Đăng nhập
           </Button>

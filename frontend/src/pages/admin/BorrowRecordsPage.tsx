@@ -10,7 +10,7 @@ import Badge from "../../components/ui/Badge";
 import Button from "../../components/ui/Button";
 import ConfirmDialog from "../../components/ui/ConfirmDialog";
 import DataTable, { type Column } from "../../components/ui/DataTable";
-import ErrorBanner from "../../components/ui/ErrorBanner";
+import Notice from "../../components/ui/Notice";
 import Input from "../../components/ui/Input";
 import Modal from "../../components/ui/Modal";
 import PageHeader from "../../components/ui/PageHeader";
@@ -169,7 +169,7 @@ export default function BorrowRecordsPage() {
         description="Lập phiếu mượn khi giao sách và xác nhận khi nhận lại sách tại quầy."
         actions={<Button onClick={openCreateForm}>+ Lập phiếu mượn</Button>}
       />
-      <ErrorBanner message={listError} />
+      <Notice tone="danger" message={listError} className="mb-3" />
       <div className="mb-3 max-w-xs">
         <Input placeholder="Tìm theo tên sách hoặc độc giả..." value={search} onChange={(e) => setSearch(e.target.value)} />
       </div>
@@ -202,7 +202,7 @@ export default function BorrowRecordsPage() {
             ))}
           </Select>
           <Input label="Hạn trả" type="date" required value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
-          <ErrorBanner message={formError} />
+          <Notice tone="danger" message={formError} />
           <div className="mt-1 flex justify-end gap-2">
             <Button type="button" variant="secondary" onClick={() => setIsFormOpen(false)}>
               Hủy

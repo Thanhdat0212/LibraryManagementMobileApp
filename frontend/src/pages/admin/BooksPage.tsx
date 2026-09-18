@@ -9,14 +9,16 @@ import type { Book } from "../../types/book";
 import type { Author } from "../../types/author";
 import type { Category } from "../../types/category";
 import type { Publisher } from "../../types/publisher";
+import { ImagePlus } from "lucide-react";
 import Button from "../../components/ui/Button";
 import ConfirmDialog from "../../components/ui/ConfirmDialog";
 import DataTable, { type Column } from "../../components/ui/DataTable";
-import ErrorBanner from "../../components/ui/ErrorBanner";
+import Notice from "../../components/ui/Notice";
 import Input from "../../components/ui/Input";
 import Modal from "../../components/ui/Modal";
 import PageHeader from "../../components/ui/PageHeader";
 import Pagination from "../../components/ui/Pagination";
+import RowActions from "../../components/ui/RowActions";
 import Select from "../../components/ui/Select";
 
 interface BookFormState {
@@ -246,16 +248,7 @@ export default function BooksPage() {
     {
       header: "",
       className: "text-right",
-      render: (b) => (
-        <div className="flex justify-end gap-2">
-          <Button variant="secondary" onClick={() => openEditForm(b)}>
-            Sửa
-          </Button>
-          <Button variant="danger" onClick={() => setDeleteTarget(b)}>
-            Xóa
-          </Button>
-        </div>
-      ),
+      render: (b) => <RowActions onEdit={() => openEditForm(b)} onDelete={() => setDeleteTarget(b)} />,
     },
   ];
 
@@ -266,7 +259,7 @@ export default function BooksPage() {
         description="Quản lý danh mục đầu sách."
         actions={<Button onClick={openCreateForm}>+ Thêm sách</Button>}
       />
-      <ErrorBanner message={listError} />
+      <Notice tone="danger" message={listError} className="mb-3" />
       <div className="mt-3 max-w-sm">
         <Input placeholder="Tìm theo tên sách hoặc ISBN..." value={search} onChange={(e) => handleSearchChange(e.target.value)} />
       </div>
@@ -337,15 +330,23 @@ export default function BooksPage() {
           <div>
             <span className="text-sm font-medium text-slate-700">Ảnh bìa</span>
             <div className="mt-1 flex items-center gap-3">
-              {form.coverImageUrl && (
-                <img src={form.coverImageUrl} alt="Bìa sách" className="h-16 w-12 rounded object-cover" />
+              {form.coverImageUrl ? (
+                <img src={form.coverImageUrl} alt="Bìa sách" className="h-20 w-14 rounded object-cover" />
+              ) : (
+                <div className="flex h-20 w-14 items-center justify-center rounded border border-dashed border-slate-300 text-slate-300">
+                  <ImagePlus className="h-5 w-5" aria-hidden="true" />
+                </div>
               )}
-              <input type="file" accept="image/*" onChange={handleCoverChange} disabled={isUploading} className="text-sm" />
+              <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50">
+                <ImagePlus className="h-4 w-4" aria-hidden="true" />
+                {form.coverImageUrl ? "Đổi ảnh" : "Chọn ảnh"}
+                <input type="file" accept="image/*" onChange={handleCoverChange} disabled={isUploading} className="hidden" />
+              </label>
               {isUploading && <span className="text-xs text-slate-500">Đang tải...</span>}
             </div>
           </div>
 
-          <ErrorBanner message={formError} />
+          <Notice tone="danger" message={formError} />
           <div className="mt-1 flex justify-end gap-2">
             <Button type="button" variant="secondary" onClick={() => setIsFormOpen(false)}>
               Hủy

@@ -5,10 +5,11 @@ import type { Category } from "../../types/category";
 import Button from "../../components/ui/Button";
 import ConfirmDialog from "../../components/ui/ConfirmDialog";
 import DataTable, { type Column } from "../../components/ui/DataTable";
-import ErrorBanner from "../../components/ui/ErrorBanner";
+import Notice from "../../components/ui/Notice";
 import Input from "../../components/ui/Input";
 import Modal from "../../components/ui/Modal";
 import PageHeader from "../../components/ui/PageHeader";
+import RowActions from "../../components/ui/RowActions";
 import Textarea from "../../components/ui/Textarea";
 
 const emptyForm = { name: "", description: "" };
@@ -98,16 +99,7 @@ export default function CategoriesPage() {
     {
       header: "",
       className: "text-right",
-      render: (c) => (
-        <div className="flex justify-end gap-2">
-          <Button variant="secondary" onClick={() => openEditForm(c)}>
-            Sửa
-          </Button>
-          <Button variant="danger" onClick={() => setDeleteTarget(c)}>
-            Xóa
-          </Button>
-        </div>
-      ),
+      render: (c) => <RowActions onEdit={() => openEditForm(c)} onDelete={() => setDeleteTarget(c)} />,
     },
   ];
 
@@ -118,7 +110,7 @@ export default function CategoriesPage() {
         description="Quản lý danh sách thể loại sách."
         actions={<Button onClick={openCreateForm}>+ Thêm thể loại</Button>}
       />
-      <ErrorBanner message={listError} />
+      <Notice tone="danger" message={listError} className="mb-3" />
       <div className="mt-3">
         <DataTable columns={columns} rows={categories} rowKey={(c) => c.id} isLoading={isLoading} emptyMessage="Chưa có thể loại nào." />
       </div>
@@ -132,7 +124,7 @@ export default function CategoriesPage() {
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
           />
-          <ErrorBanner message={formError} />
+          <Notice tone="danger" message={formError} />
           <div className="mt-1 flex justify-end gap-2">
             <Button type="button" variant="secondary" onClick={() => setIsFormOpen(false)}>
               Hủy

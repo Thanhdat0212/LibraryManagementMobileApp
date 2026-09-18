@@ -6,7 +6,8 @@ import type { User } from "../../types/user";
 import Badge from "../../components/ui/Badge";
 import Button from "../../components/ui/Button";
 import DataTable, { type Column } from "../../components/ui/DataTable";
-import ErrorBanner from "../../components/ui/ErrorBanner";
+import Notice from "../../components/ui/Notice";
+import Input from "../../components/ui/Input";
 import PageHeader from "../../components/ui/PageHeader";
 
 export default function UsersPage() {
@@ -15,6 +16,7 @@ export default function UsersPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [processingId, setProcessingId] = useState<number | null>(null);
+  const [search, setSearch] = useState("");
 
   function load() {
     setIsLoading(true);
@@ -44,6 +46,12 @@ export default function UsersPage() {
       setProcessingId(null);
     }
   }
+
+  const filteredUsers = users.filter((u) => {
+    const q = search.trim().toLowerCase();
+    if (!q) return true;
+    return u.fullName.toLowerCase().includes(q) || u.email.toLowerCase().includes(q);
+  });
 
   const columns: Column<User>[] = [
     { header: "Họ tên", render: (u) => <span className="font-medium text-slate-900">{u.fullName}</span> },
@@ -83,9 +91,18 @@ export default function UsersPage() {
   return (
     <div>
       <PageHeader title="Người dùng" description="Danh sách tài khoản đã đăng ký trong hệ thống." />
-      <ErrorBanner message={error} />
+      <Notice tone="danger" message={error} className="mb-3" />
+      <div className="max-w-sm">
+        <Input placeholder="Tìm theo tên hoặc email..." value={search} onChange={(e) => setSearch(e.target.value)} />
+      </div>
       <div className="mt-3">
-        <DataTable columns={columns} rows={users} rowKey={(u) => u.id} isLoading={isLoading} emptyMessage="Chưa có người dùng nào." />
+        <DataTable
+          columns={columns}
+          rows={filteredUsers}
+          rowKey={(u) => u.id}
+          isLoading={isLoading}
+          emptyMessage="Không tìm thấy người dùng phù hợp."
+        />
       </div>
     </div>
   );

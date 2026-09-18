@@ -5,10 +5,15 @@ import { borrowRequestsApi } from "../../api/borrowRequestsApi";
 import { getErrorMessage } from "../../api/axiosClient";
 import type { Book } from "../../types/book";
 import Button from "../../components/ui/Button";
-import ErrorBanner from "../../components/ui/ErrorBanner";
+import Notice from "../../components/ui/Notice";
 import PageHeader from "../../components/ui/PageHeader";
 import Spinner from "../../components/ui/Spinner";
 import Textarea from "../../components/ui/Textarea";
+
+interface RequestFeedback {
+  tone: "success" | "danger";
+  text: string;
+}
 
 export default function BookDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -21,7 +26,7 @@ export default function BookDetailPage() {
   const [note, setNote] = useState("");
   const [isRequesting, setIsRequesting] = useState(false);
   const [requested, setRequested] = useState(false);
-  const [requestMessage, setRequestMessage] = useState<string | null>(null);
+  const [requestFeedback, setRequestFeedback] = useState<RequestFeedback | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -37,13 +42,13 @@ export default function BookDetailPage() {
   async function handleRequestBorrow() {
     if (!book) return;
     setIsRequesting(true);
-    setRequestMessage(null);
+    setRequestFeedback(null);
     try {
       await borrowRequestsApi.create({ bookId: book.id, note: note.trim() || undefined });
       setRequested(true);
-      setRequestMessage(`Đã gửi yêu cầu mượn "${book.title}". Vui lòng chờ thủ thư duyệt.`);
+      setRequestFeedback({ tone: "success", text: `Đã gửi yêu cầu mượn "${book.title}". Vui lòng chờ thủ thư duyệt.` });
     } catch (err) {
-      setRequestMessage(getErrorMessage(err, "Không gửi được yêu cầu mượn sách."));
+      setRequestFeedback({ tone: "danger", text: getErrorMessage(err, "Không gửi được yêu cầu mượn sách.") });
     } finally {
       setIsRequesting(false);
     }
@@ -54,7 +59,7 @@ export default function BookDetailPage() {
   if (error || !book) {
     return (
       <div>
-        <ErrorBanner message={error ?? "Không tìm thấy sách."} />
+        <Notice tone="danger" message={error ?? "Không tìm thấy sách."} />
         <Link to="/catalog" className="mt-3 inline-block text-sm text-indigo-600 hover:underline">
           ← Quay lại danh mục sách
         </Link>
@@ -101,11 +106,7 @@ export default function BookDetailPage() {
           </dl>
 
           <div className="mt-5 max-w-md">
-            {requestMessage && (
-              <div className="mb-3 rounded-md border border-indigo-200 bg-indigo-50 px-3 py-2 text-sm text-indigo-700">
-                {requestMessage}
-              </div>
-            )}
+            {requestFeedback && <Notice tone={requestFeedback.tone} message={requestFeedback.text} className="mb-3" />}
             {!requested && (
               <Textarea
                 label="Ghi chú cho thủ thư (không bắt buộc)"

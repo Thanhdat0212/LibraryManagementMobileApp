@@ -5,10 +5,11 @@ import type { Author } from "../../types/author";
 import Button from "../../components/ui/Button";
 import ConfirmDialog from "../../components/ui/ConfirmDialog";
 import DataTable, { type Column } from "../../components/ui/DataTable";
-import ErrorBanner from "../../components/ui/ErrorBanner";
+import Notice from "../../components/ui/Notice";
 import Input from "../../components/ui/Input";
 import Modal from "../../components/ui/Modal";
 import PageHeader from "../../components/ui/PageHeader";
+import RowActions from "../../components/ui/RowActions";
 import Textarea from "../../components/ui/Textarea";
 
 const emptyForm = { fullName: "", bio: "", nationality: "" };
@@ -103,16 +104,7 @@ export default function AuthorsPage() {
     {
       header: "",
       className: "text-right",
-      render: (a) => (
-        <div className="flex justify-end gap-2">
-          <Button variant="secondary" onClick={() => openEditForm(a)}>
-            Sửa
-          </Button>
-          <Button variant="danger" onClick={() => setDeleteTarget(a)}>
-            Xóa
-          </Button>
-        </div>
-      ),
+      render: (a) => <RowActions onEdit={() => openEditForm(a)} onDelete={() => setDeleteTarget(a)} />,
     },
   ];
 
@@ -123,7 +115,7 @@ export default function AuthorsPage() {
         description="Quản lý danh sách tác giả sách."
         actions={<Button onClick={openCreateForm}>+ Thêm tác giả</Button>}
       />
-      <ErrorBanner message={listError} />
+      <Notice tone="danger" message={listError} className="mb-3" />
       <div className="mt-3">
         <DataTable columns={columns} rows={authors} rowKey={(a) => a.id} isLoading={isLoading} emptyMessage="Chưa có tác giả nào." />
       </div>
@@ -147,7 +139,7 @@ export default function AuthorsPage() {
             value={form.bio}
             onChange={(e) => setForm({ ...form, bio: e.target.value })}
           />
-          <ErrorBanner message={formError} />
+          <Notice tone="danger" message={formError} />
           <div className="mt-1 flex justify-end gap-2">
             <Button type="button" variant="secondary" onClick={() => setIsFormOpen(false)}>
               Hủy

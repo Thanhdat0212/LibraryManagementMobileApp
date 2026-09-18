@@ -9,7 +9,7 @@ import type { Fine } from "../../types/fine";
 import Badge from "../../components/ui/Badge";
 import Button from "../../components/ui/Button";
 import DataTable, { type Column } from "../../components/ui/DataTable";
-import ErrorBanner from "../../components/ui/ErrorBanner";
+import Notice from "../../components/ui/Notice";
 import PageHeader from "../../components/ui/PageHeader";
 import { formatCurrency } from "../../utils/formatCurrency";
 import { formatDate } from "../../utils/formatDate";
@@ -22,6 +22,11 @@ const requestStatusLabel: Record<BorrowRequest["status"], string> = {
   Cancelled: "Đã hủy",
 };
 
+interface ActionFeedback {
+  tone: "success" | "danger";
+  text: string;
+}
+
 export default function MyBorrowsPage() {
   const [records, setRecords] = useState<BorrowRecord[]>([]);
   const [requests, setRequests] = useState<BorrowRequest[]>([]);
@@ -29,7 +34,7 @@ export default function MyBorrowsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [renewingId, setRenewingId] = useState<number | null>(null);
-  const [renewMessage, setRenewMessage] = useState<string | null>(null);
+  const [actionFeedback, setActionFeedback] = useState<ActionFeedback | null>(null);
   const [cancellingId, setCancellingId] = useState<number | null>(null);
 
   function load() {
@@ -48,13 +53,13 @@ export default function MyBorrowsPage() {
 
   async function handleRenew(record: BorrowRecord) {
     setRenewingId(record.id);
-    setRenewMessage(null);
+    setActionFeedback(null);
     try {
       await borrowRecordsApi.renew(record.id);
-      setRenewMessage(`Đã gia hạn "${record.bookTitle}" thành công.`);
+      setActionFeedback({ tone: "success", text: `Đã gia hạn "${record.bookTitle}" thành công.` });
       load();
     } catch (err) {
-      setRenewMessage(getErrorMessage(err, "Không gia hạn được phiếu mượn này."));
+      setActionFeedback({ tone: "danger", text: getErrorMessage(err, "Không gia hạn được phiếu mượn này.") });
     } finally {
       setRenewingId(null);
     }
@@ -62,13 +67,13 @@ export default function MyBorrowsPage() {
 
   async function handleCancelRequest(request: BorrowRequest) {
     setCancellingId(request.id);
-    setRenewMessage(null);
+    setActionFeedback(null);
     try {
       await borrowRequestsApi.cancel(request.id);
-      setRenewMessage(`Đã hủy yêu cầu mượn "${request.bookTitle}".`);
+      setActionFeedback({ tone: "success", text: `Đã hủy yêu cầu mượn "${request.bookTitle}".` });
       load();
     } catch (err) {
-      setRenewMessage(getErrorMessage(err, "Không hủy được yêu cầu mượn này."));
+      setActionFeedback({ tone: "danger", text: getErrorMessage(err, "Không hủy được yêu cầu mượn này.") });
     } finally {
       setCancellingId(null);
     }
@@ -104,10 +109,15 @@ export default function MyBorrowsPage() {
         title="Sách đang mượn"
         description="Lịch sử mượn sách của bạn. Việc giao/nhận sách được thực hiện tại quầy thủ thư."
       />
-      <ErrorBanner message={error} />
-      {renewMessage && (
-        <div className="mb-3 rounded-md border border-indigo-200 bg-indigo-50 px-3 py-2 text-sm text-indigo-700">
-          {renewMessage}
+      <Notice tone="danger" message={error} className="mb-3" />
+      {actionFeedback && <Notice tone={actionFeedback.tone} message={actionFeedback.text} className="mb-3" />}
+
+      {fines.length > 0 && (
+        <div className="mb-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          <p className="font-medium">
+            Bạn có {fines.length} khoản phạt chưa thanh toán, tổng {formatCurrency(fines.reduce((sum, f) => sum + f.amount, 0))}.
+            Vui lòng thanh toán tại quầy thủ thư.
+          </p>
         </div>
       )}
 
@@ -131,15 +141,6 @@ export default function MyBorrowsPage() {
               </li>
             ))}
           </ul>
-        </div>
-      )}
-
-      {fines.length > 0 && (
-        <div className="mb-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-          <p className="font-medium">
-            Bạn có {fines.length} khoản phạt chưa thanh toán, tổng {formatCurrency(fines.reduce((sum, f) => sum + f.amount, 0))}.
-            Vui lòng thanh toán tại quầy thủ thư.
-          </p>
         </div>
       )}
 

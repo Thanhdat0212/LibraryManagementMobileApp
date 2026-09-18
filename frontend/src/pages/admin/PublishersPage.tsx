@@ -5,10 +5,11 @@ import type { Publisher } from "../../types/publisher";
 import Button from "../../components/ui/Button";
 import ConfirmDialog from "../../components/ui/ConfirmDialog";
 import DataTable, { type Column } from "../../components/ui/DataTable";
-import ErrorBanner from "../../components/ui/ErrorBanner";
+import Notice from "../../components/ui/Notice";
 import Input from "../../components/ui/Input";
 import Modal from "../../components/ui/Modal";
 import PageHeader from "../../components/ui/PageHeader";
+import RowActions from "../../components/ui/RowActions";
 
 const emptyForm = { name: "", address: "", phone: "" };
 
@@ -98,16 +99,7 @@ export default function PublishersPage() {
     {
       header: "",
       className: "text-right",
-      render: (p) => (
-        <div className="flex justify-end gap-2">
-          <Button variant="secondary" onClick={() => openEditForm(p)}>
-            Sửa
-          </Button>
-          <Button variant="danger" onClick={() => setDeleteTarget(p)}>
-            Xóa
-          </Button>
-        </div>
-      ),
+      render: (p) => <RowActions onEdit={() => openEditForm(p)} onDelete={() => setDeleteTarget(p)} />,
     },
   ];
 
@@ -118,7 +110,7 @@ export default function PublishersPage() {
         description="Quản lý danh sách nhà xuất bản."
         actions={<Button onClick={openCreateForm}>+ Thêm nhà xuất bản</Button>}
       />
-      <ErrorBanner message={listError} />
+      <Notice tone="danger" message={listError} className="mb-3" />
       <div className="mt-3">
         <DataTable
           columns={columns}
@@ -134,7 +126,7 @@ export default function PublishersPage() {
           <Input label="Tên" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
           <Input label="Địa chỉ" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
           <Input label="Điện thoại" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
-          <ErrorBanner message={formError} />
+          <Notice tone="danger" message={formError} />
           <div className="mt-1 flex justify-end gap-2">
             <Button type="button" variant="secondary" onClick={() => setIsFormOpen(false)}>
               Hủy
