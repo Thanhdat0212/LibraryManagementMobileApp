@@ -118,9 +118,15 @@ export default function CatalogPage() {
               return (
                 <div key={book.id} className="rounded-lg border border-slate-200 bg-white p-3">
                   {book.coverImageUrl ? (
-                    <img src={book.coverImageUrl} alt={book.title} className="mb-2 h-40 w-full rounded object-cover" />
+                    <div className="mb-2 aspect-[2/3] w-full overflow-hidden rounded bg-slate-100">
+                      <img
+                        src={book.coverImageUrl}
+                        alt={book.title}
+                        className="h-full w-full object-cover object-top"
+                      />
+                    </div>
                   ) : (
-                    <div className="mb-2 flex h-40 w-full items-center justify-center rounded bg-slate-100 text-xs text-slate-400">
+                    <div className="mb-2 flex aspect-[2/3] w-full items-center justify-center rounded bg-slate-100 text-xs text-slate-400">
                       Không có ảnh bìa
                     </div>
                   )}
