@@ -4,4 +4,5 @@ export interface LibraryUser {
   fullName: string;
   email: string;
   role: "Admin" | "Member";
+  isLocked: boolean;
 }

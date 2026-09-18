@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import { useFocusEffect } from "@react-navigation/native";
+import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
   ActivityIndicator,
   Alert,
@@ -15,12 +16,15 @@ import { getErrorMessage } from "../../api/axiosClient";
 import { borrowStatusMeta } from "../../utils/statusMeta";
 import BorrowRecordFormModal from "../../components/BorrowRecordFormModal";
 import type { BorrowRecord, CreateBorrowRecordRequest } from "../../types/borrowRecord";
+import type { BorrowOperationsStackParamList } from "../../navigation/AdminNavigator";
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("vi-VN");
 }
 
-export default function BorrowRecordsScreen() {
+type Props = NativeStackScreenProps<BorrowOperationsStackParamList, "BorrowRecordsList">;
+
+export default function BorrowRecordsScreen({ navigation }: Props) {
   const [records, setRecords] = useState<BorrowRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -58,9 +62,17 @@ export default function BorrowRecordsScreen() {
 
   return (
     <View style={styles.container}>
-      <Pressable style={styles.addButton} onPress={() => setIsFormVisible(true)}>
-        <Text style={styles.addButtonText}>+ Tạo phiếu mượn</Text>
-      </Pressable>
+      <View style={styles.topRow}>
+        <Pressable style={styles.addButton} onPress={() => setIsFormVisible(true)}>
+          <Text style={styles.addButtonText}>+ Tạo phiếu mượn</Text>
+        </Pressable>
+        <Pressable style={styles.linkButton} onPress={() => navigation.navigate("BorrowRequests")}>
+          <Text style={styles.linkButtonText}>Yêu cầu mượn</Text>
+        </Pressable>
+        <Pressable style={styles.linkButton} onPress={() => navigation.navigate("Fines")}>
+          <Text style={styles.linkButtonText}>Phạt</Text>
+        </Pressable>
+      </View>
 
       {loading && records.length === 0 && <ActivityIndicator style={styles.spinner} />}
       {error ? <Text style={styles.error}>{error}</Text> : null}
@@ -112,16 +124,32 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     backgroundColor: "#fff",
   },
+  topRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginBottom: 12,
+  },
   addButton: {
-    alignSelf: "flex-start",
     backgroundColor: "#2563eb",
     borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 8,
-    marginBottom: 12,
   },
   addButtonText: {
     color: "#fff",
+    fontWeight: "600",
+    fontSize: 13,
+  },
+  linkButton: {
+    borderWidth: 1,
+    borderColor: "#d1d5db",
+    borderRadius: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+  },
+  linkButtonText: {
+    color: "#374151",
     fontWeight: "600",
     fontSize: 13,
   },

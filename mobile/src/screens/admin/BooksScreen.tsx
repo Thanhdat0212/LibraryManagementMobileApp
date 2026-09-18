@@ -40,9 +40,9 @@ export default function BooksScreen({ navigation }: Props) {
   function load() {
     setLoading(true);
     setError("");
-    Promise.all([booksApi.getAll(), publishersApi.getAll(), categoriesApi.getAll(), authorsApi.getAll()])
+    Promise.all([booksApi.getAll({ pageSize: 100 }), publishersApi.getAll(), categoriesApi.getAll(), authorsApi.getAll()])
       .then(([b, p, c, a]) => {
-        setBooks(b);
+        setBooks(b.items);
         setPublishers(p);
         setCategories(c);
         setAuthors(a);

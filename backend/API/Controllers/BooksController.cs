@@ -18,7 +18,7 @@ public class BooksController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll() => Ok(await _bookService.GetAllAsync());
+    public async Task<IActionResult> GetAll([FromQuery] BookQueryDto query) => Ok(await _bookService.GetAllAsync(query));
 
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id)

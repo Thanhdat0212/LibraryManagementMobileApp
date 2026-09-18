@@ -1,23 +1,12 @@
 import { useCallback, useState } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native";
-import { booksApi } from "../../api/booksApi";
-import { bookCopiesApi } from "../../api/bookCopiesApi";
-import { borrowRecordsApi } from "../../api/borrowRecordsApi";
+import { dashboardApi } from "../../api/dashboardApi";
 import { getErrorMessage } from "../../api/axiosClient";
-import { usersApi } from "../../api/usersApi";
-
-interface Stats {
-  totalBooks: number;
-  availableCopies: number;
-  totalCopies: number;
-  activeBorrows: number;
-  overdueBorrows: number;
-  totalUsers: number;
-}
+import type { DashboardSummary } from "../../types/dashboard";
 
 export default function DashboardScreen() {
-  const [stats, setStats] = useState<Stats | null>(null);
+  const [stats, setStats] = useState<DashboardSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -25,21 +14,9 @@ export default function DashboardScreen() {
     useCallback(() => {
       let active = true;
       setLoading(true);
-      Promise.all([booksApi.getAll(), bookCopiesApi.getAll(), borrowRecordsApi.getAll(), usersApi.getAll()])
-        .then(([books, copies, borrows, users]) => {
-          if (!active) return;
-          const now = Date.now();
-          setStats({
-            totalBooks: books.length,
-            totalCopies: copies.length,
-            availableCopies: copies.filter((c) => c.status === "Available").length,
-            activeBorrows: borrows.filter((b) => b.status === "Borrowing").length,
-            overdueBorrows: borrows.filter(
-              (b) => b.status === "Borrowing" && new Date(b.dueDate).getTime() < now,
-            ).length,
-            totalUsers: users.length,
-          });
-        })
+      dashboardApi
+        .getSummary()
+        .then((res) => active && setStats(res))
         .catch((err) => active && setError(getErrorMessage(err)))
         .finally(() => active && setLoading(false));
       return () => {
@@ -57,6 +34,8 @@ export default function DashboardScreen() {
     { label: "Bản sao sẵn sàng", value: `${stats.availableCopies}/${stats.totalCopies}` },
     { label: "Đang được mượn", value: stats.activeBorrows },
     { label: "Quá hạn", value: stats.overdueBorrows, danger: stats.overdueBorrows > 0 },
+    { label: "Yêu cầu chờ duyệt", value: stats.pendingBorrowRequests, danger: stats.pendingBorrowRequests > 0 },
+    { label: "Phạt chưa thu", value: stats.unpaidFinesCount, danger: stats.unpaidFinesCount > 0 },
     { label: "Tổng người dùng", value: stats.totalUsers },
   ];
 

@@ -4,5 +4,5 @@ import { useAuth } from "../context/AuthContext";
 export default function HomeRedirect() {
   const { user } = useAuth();
   if (!user) return <Navigate to="/login" replace />;
-  return <Navigate to={user.role === "Admin" ? "/admin/books" : "/catalog"} replace />;
+  return <Navigate to={user.role === "Admin" ? "/admin/dashboard" : "/catalog"} replace />;
 }

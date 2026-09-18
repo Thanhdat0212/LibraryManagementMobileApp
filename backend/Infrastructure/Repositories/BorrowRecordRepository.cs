@@ -1,5 +1,6 @@
 ﻿using Application.Interfaces.Repositories;
 using Domain.Entities;
+using Domain.Enums;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -38,5 +39,21 @@ public class BorrowRecordRepository : Repository<BorrowRecord>, IBorrowRecordRep
             .Include(r => r.User)
             .Where(r => r.UserId == userId)
             .ToListAsync();
+    }
+
+    public async Task<int> CountActiveByUserIdAsync(int userId)
+    {
+        return await _dbSet.CountAsync(r => r.UserId == userId && r.Status == BorrowStatus.Borrowing);
+    }
+
+    public async Task<int> CountActiveAsync()
+    {
+        return await _dbSet.CountAsync(r => r.Status == BorrowStatus.Borrowing);
+    }
+
+    public async Task<int> CountOverdueAsync()
+    {
+        var now = DateTime.UtcNow;
+        return await _dbSet.CountAsync(r => r.Status == BorrowStatus.Borrowing && r.DueDate < now);
     }
 }

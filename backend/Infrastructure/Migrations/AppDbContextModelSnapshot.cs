@@ -169,6 +169,9 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("DueDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int>("RenewalCount")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime?>("ReturnDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -187,6 +190,58 @@ namespace Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("BorrowRecords");
+                });
+
+            modelBuilder.Entity("Domain.Entities.BorrowRequest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BookId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime?>("ProcessedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("ProcessedByUserId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("RequestedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("ResultingBorrowRecordId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BookId");
+
+                    b.HasIndex("ProcessedByUserId");
+
+                    b.HasIndex("ResultingBorrowRecordId")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("BorrowRequests");
                 });
 
             modelBuilder.Entity("Domain.Entities.Category", b =>
@@ -211,6 +266,44 @@ namespace Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Categories");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Fine", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(12,2)");
+
+                    b.Property<int>("BorrowRecordId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("PaidAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BorrowRecordId")
+                        .IsUnique();
+
+                    b.ToTable("Fines");
                 });
 
             modelBuilder.Entity("Domain.Entities.Publisher", b =>
@@ -261,6 +354,9 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
+
+                    b.Property<bool>("IsLocked")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
@@ -347,6 +443,50 @@ namespace Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Domain.Entities.BorrowRequest", b =>
+                {
+                    b.HasOne("Domain.Entities.Book", "Book")
+                        .WithMany()
+                        .HasForeignKey("BookId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.User", "ProcessedByUser")
+                        .WithMany()
+                        .HasForeignKey("ProcessedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Domain.Entities.BorrowRecord", "ResultingBorrowRecord")
+                        .WithOne()
+                        .HasForeignKey("Domain.Entities.BorrowRequest", "ResultingBorrowRecordId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Domain.Entities.User", "User")
+                        .WithMany("BorrowRequests")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Book");
+
+                    b.Navigation("ProcessedByUser");
+
+                    b.Navigation("ResultingBorrowRecord");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Fine", b =>
+                {
+                    b.HasOne("Domain.Entities.BorrowRecord", "BorrowRecord")
+                        .WithOne("Fine")
+                        .HasForeignKey("Domain.Entities.Fine", "BorrowRecordId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("BorrowRecord");
+                });
+
             modelBuilder.Entity("Domain.Entities.Author", b =>
                 {
                     b.Navigation("BookAuthors");
@@ -364,6 +504,11 @@ namespace Infrastructure.Migrations
                     b.Navigation("BorrowRecords");
                 });
 
+            modelBuilder.Entity("Domain.Entities.BorrowRecord", b =>
+                {
+                    b.Navigation("Fine");
+                });
+
             modelBuilder.Entity("Domain.Entities.Category", b =>
                 {
                     b.Navigation("Books");
@@ -377,6 +522,8 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Entities.User", b =>
                 {
                     b.Navigation("BorrowRecords");
+
+                    b.Navigation("BorrowRequests");
                 });
 #pragma warning restore 612, 618
         }

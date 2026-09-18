@@ -55,9 +55,9 @@ export default function BookCopiesPage() {
     setIsLoading(true);
     setListError(null);
     try {
-      const [copiesRes, booksRes] = await Promise.all([bookCopiesApi.getAll(), booksApi.getAll()]);
+      const [copiesRes, booksRes] = await Promise.all([bookCopiesApi.getAll(), booksApi.getAll({ pageSize: 100 })]);
       setCopies(copiesRes);
-      setBooks(booksRes);
+      setBooks(booksRes.items);
     } catch (err) {
       setListError(getErrorMessage(err, "Không tải được danh sách bản sao sách."));
     } finally {

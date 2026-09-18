@@ -20,6 +20,10 @@ public class AuthController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterDto dto)
     {
+       
+        if(string.IsNullOrEmpty(dto.Email) || string.IsNullOrEmpty(dto.Password))
+            return BadRequest(new { message = "Email và mật khẩu không được để trống." });
+            
         var result = await _authService.RegisterAsync(dto);
         return Ok(result);
     }
@@ -27,6 +31,7 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginDto dto)
     {
+        
         var result = await _authService.LoginAsync(dto);
         if (result == null)
             return Unauthorized(new { message = "Email hoặc mật khẩu không đúng." });

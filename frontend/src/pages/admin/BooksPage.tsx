@@ -16,6 +16,7 @@ import ErrorBanner from "../../components/ui/ErrorBanner";
 import Input from "../../components/ui/Input";
 import Modal from "../../components/ui/Modal";
 import PageHeader from "../../components/ui/PageHeader";
+import Pagination from "../../components/ui/Pagination";
 import Select from "../../components/ui/Select";
 
 interface BookFormState {
@@ -40,8 +41,13 @@ const emptyForm: BookFormState = {
   coverImagePublicId: "",
 };
 
+const PAGE_SIZE = 20;
+
 export default function BooksPage() {
   const [books, setBooks] = useState<Book[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
   const [authors, setAuthors] = useState<Author[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [publishers, setPublishers] = useState<Publisher[]>([]);
@@ -58,20 +64,28 @@ export default function BooksPage() {
   const [deleteTarget, setDeleteTarget] = useState<Book | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  async function loadAll() {
-    setIsLoading(true);
-    setListError(null);
+  async function loadLookups() {
     try {
-      const [booksRes, authorsRes, categoriesRes, publishersRes] = await Promise.all([
-        booksApi.getAll(),
+      const [authorsRes, categoriesRes, publishersRes] = await Promise.all([
         authorsApi.getAll(),
         categoriesApi.getAll(),
         publishersApi.getAll(),
       ]);
-      setBooks(booksRes);
       setAuthors(authorsRes);
       setCategories(categoriesRes);
       setPublishers(publishersRes);
+    } catch (err) {
+      setListError(getErrorMessage(err, "Không tải được danh sách sách."));
+    }
+  }
+
+  async function loadBooks() {
+    setIsLoading(true);
+    setListError(null);
+    try {
+      const res = await booksApi.getAll({ search: search || undefined, page, pageSize: PAGE_SIZE });
+      setBooks(res.items);
+      setTotalCount(res.totalCount);
     } catch (err) {
       setListError(getErrorMessage(err, "Không tải được danh sách sách."));
     } finally {
@@ -80,8 +94,20 @@ export default function BooksPage() {
   }
 
   useEffect(() => {
-    loadAll();
+    loadLookups();
   }, []);
+
+  // Debounce tìm kiếm 300ms để tránh gọi API liên tục khi đang gõ.
+  useEffect(() => {
+    const handle = setTimeout(loadBooks, 300);
+    return () => clearTimeout(handle);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, search]);
+
+  function handleSearchChange(value: string) {
+    setSearch(value);
+    setPage(1);
+  }
 
   function openCreateForm() {
     setEditing(null);
@@ -163,7 +189,7 @@ export default function BooksPage() {
         await booksApi.create(payload);
       }
       setIsFormOpen(false);
-      await loadAll();
+      await loadBooks();
     } catch (err) {
       setFormError(getErrorMessage(err, "Không lưu được sách."));
     } finally {
@@ -177,7 +203,7 @@ export default function BooksPage() {
     try {
       await booksApi.remove(deleteTarget.id);
       setDeleteTarget(null);
-      await loadAll();
+      await loadBooks();
     } catch (err) {
       setListError(getErrorMessage(err, "Không xóa được sách."));
       setDeleteTarget(null);
@@ -210,6 +236,14 @@ export default function BooksPage() {
     { header: "NXB", render: (b) => b.publisherName },
     { header: "Năm XB", render: (b) => b.publishedYear },
     {
+      header: "Số lượng",
+      render: (b) => (
+        <span className={b.availableCopies === 0 ? "text-red-600" : "text-slate-700"}>
+          {b.availableCopies}/{b.totalCopies}
+        </span>
+      ),
+    },
+    {
       header: "",
       className: "text-right",
       render: (b) => (
@@ -233,8 +267,12 @@ export default function BooksPage() {
         actions={<Button onClick={openCreateForm}>+ Thêm sách</Button>}
       />
       <ErrorBanner message={listError} />
+      <div className="mt-3 max-w-sm">
+        <Input placeholder="Tìm theo tên sách hoặc ISBN..." value={search} onChange={(e) => handleSearchChange(e.target.value)} />
+      </div>
       <div className="mt-3">
         <DataTable columns={columns} rows={books} rowKey={(b) => b.id} isLoading={isLoading} emptyMessage="Chưa có sách nào." />
+        <Pagination page={page} pageSize={PAGE_SIZE} totalCount={totalCount} onPageChange={setPage} />
       </div>
 
       <Modal open={isFormOpen} title={editing ? "Sửa sách" : "Thêm sách"} onClose={() => setIsFormOpen(false)} widthClassName="max-w-xl">

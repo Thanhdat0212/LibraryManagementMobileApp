@@ -3,6 +3,7 @@ import { usersApi } from "../../api/usersApi";
 import { getErrorMessage } from "../../api/axiosClient";
 import type { User } from "../../types/user";
 import Badge from "../../components/ui/Badge";
+import Button from "../../components/ui/Button";
 import DataTable, { type Column } from "../../components/ui/DataTable";
 import ErrorBanner from "../../components/ui/ErrorBanner";
 import PageHeader from "../../components/ui/PageHeader";
@@ -11,14 +12,49 @@ export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [processingId, setProcessingId] = useState<number | null>(null);
 
-  useEffect(() => {
+  function load() {
+    setIsLoading(true);
+    setError(null);
     usersApi
       .getAll()
       .then(setUsers)
       .catch((err) => setError(getErrorMessage(err, "Không tải được danh sách người dùng.")))
       .finally(() => setIsLoading(false));
-  }, []);
+  }
+
+  useEffect(load, []);
+
+  async function handleToggleLock(user: User) {
+    setProcessingId(user.id);
+    setError(null);
+    try {
+      if (user.isLocked) {
+        await usersApi.unlock(user.id);
+      } else {
+        await usersApi.lock(user.id);
+      }
+      load();
+    } catch (err) {
+      setError(getErrorMessage(err, "Không cập nhật được trạng thái tài khoản."));
+    } finally {
+      setProcessingId(null);
+    }
+  }
+
+  async function handleToggleRole(user: User) {
+    setProcessingId(user.id);
+    setError(null);
+    try {
+      await usersApi.changeRole(user.id, user.role === "Admin" ? "Member" : "Admin");
+      load();
+    } catch (err) {
+      setError(getErrorMessage(err, "Không đổi được vai trò người dùng."));
+    } finally {
+      setProcessingId(null);
+    }
+  }
 
   const columns: Column<User>[] = [
     { header: "Họ tên", render: (u) => <span className="font-medium text-slate-900">{u.fullName}</span> },
@@ -26,6 +62,28 @@ export default function UsersPage() {
     {
       header: "Vai trò",
       render: (u) => <Badge tone={u.role === "Admin" ? "amber" : "gray"}>{u.role === "Admin" ? "Quản trị viên" : "Độc giả"}</Badge>,
+    },
+    {
+      header: "Trạng thái",
+      render: (u) => (u.isLocked ? <Badge tone="red">Đã khóa</Badge> : <Badge tone="green">Hoạt động</Badge>),
+    },
+    {
+      header: "",
+      className: "text-right",
+      render: (u) => (
+        <div className="flex justify-end gap-2">
+          <Button variant="secondary" isLoading={processingId === u.id} onClick={() => handleToggleRole(u)}>
+            {u.role === "Admin" ? "Hạ quyền" : "Nâng Admin"}
+          </Button>
+          <Button
+            variant={u.isLocked ? "secondary" : "danger"}
+            isLoading={processingId === u.id}
+            onClick={() => handleToggleLock(u)}
+          >
+            {u.isLocked ? "Mở khóa" : "Khóa"}
+          </Button>
+        </div>
+      ),
     },
   ];
 

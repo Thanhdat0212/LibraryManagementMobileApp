@@ -66,6 +66,19 @@ public class BorrowRecordsController : ControllerBase
             : NotFound(new { message = "Không tìm thấy phiếu mượn hoặc đã được trả trước đó." });
     }
 
+    // Member tự gia hạn phiếu mượn của chính mình; Admin gia hạn được cho bất kỳ ai.
+    [HttpPost("{id:int}/renew")]
+    public async Task<IActionResult> Renew(int id)
+    {
+        var record = await _borrowRecordService.GetByIdAsync(id);
+        if (record == null) return NotFound();
+
+        if (!User.IsInRole("Admin") && record.UserId != GetCurrentUserId())
+            return Forbid();
+
+        return Ok(await _borrowRecordService.RenewAsync(id));
+    }
+
     private int GetCurrentUserId()
     {
         var value = User.FindFirstValue(ClaimTypes.NameIdentifier)

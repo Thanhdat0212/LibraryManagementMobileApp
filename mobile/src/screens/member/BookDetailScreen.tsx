@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { booksApi } from "../../api/booksApi";
-import { bookCopiesApi } from "../../api/bookCopiesApi";
+import { borrowRequestsApi } from "../../api/borrowRequestsApi";
 import { getErrorMessage } from "../../api/axiosClient";
 import type { Book } from "../../types/book";
 import type { CatalogStackParamList } from "../../navigation/MemberNavigator";
@@ -12,22 +12,34 @@ type Props = NativeStackScreenProps<CatalogStackParamList, "BookDetail">;
 export default function BookDetailScreen({ route }: Props) {
   const { bookId } = route.params;
   const [book, setBook] = useState<Book | null>(null);
-  const [availableCount, setAvailableCount] = useState(0);
-  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [requesting, setRequesting] = useState(false);
+  const [requested, setRequested] = useState(false);
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
-    Promise.all([booksApi.getAll(), bookCopiesApi.getAll()])
-      .then(([books, copies]) => {
-        setBook(books.find((b) => b.id === bookId) ?? null);
-        const ofBook = copies.filter((c) => c.bookId === bookId);
-        setTotalCount(ofBook.length);
-        setAvailableCount(ofBook.filter((c) => c.status === "Available").length);
-      })
+    booksApi
+      .getById(bookId)
+      .then(setBook)
       .catch((err) => setError(getErrorMessage(err)))
       .finally(() => setLoading(false));
   }, [bookId]);
+
+  async function handleRequestBorrow() {
+    if (!book) return;
+    setRequesting(true);
+    setMessage("");
+    try {
+      await borrowRequestsApi.create({ bookId: book.id });
+      setRequested(true);
+      setMessage("Đã gửi yêu cầu mượn, vui lòng chờ thủ thư duyệt.");
+    } catch (err) {
+      setMessage(getErrorMessage(err));
+    } finally {
+      setRequesting(false);
+    }
+  }
 
   if (loading) return <ActivityIndicator style={styles.spinner} />;
   if (error) return <Text style={styles.error}>{error}</Text>;
@@ -43,12 +55,21 @@ export default function BookDetailScreen({ route }: Props) {
 
       <Text style={styles.title}>{book.title}</Text>
       <Text style={styles.availability}>
-        {availableCount > 0
-          ? `Còn ${availableCount}/${totalCount} bản sẵn sàng`
-          : totalCount > 0
+        {book.availableCopies > 0
+          ? `Còn ${book.availableCopies}/${book.totalCopies} bản sẵn sàng`
+          : book.totalCopies > 0
             ? "Hiện đã hết bản có sẵn"
             : "Chưa có bản sao nào"}
       </Text>
+
+      <Pressable
+        style={[styles.requestButton, (book.availableCopies === 0 || requested) && styles.requestButtonDisabled]}
+        disabled={book.availableCopies === 0 || requested || requesting}
+        onPress={handleRequestBorrow}
+      >
+        <Text style={styles.requestButtonText}>{requested ? "Đã gửi yêu cầu" : requesting ? "Đang gửi..." : "Yêu cầu mượn"}</Text>
+      </Pressable>
+      {message ? <Text style={styles.message}>{message}</Text> : null}
 
       <View style={styles.row}>
         <Text style={styles.label}>ISBN</Text>
@@ -110,6 +131,27 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#2563eb",
     marginBottom: 16,
+  },
+  requestButton: {
+    backgroundColor: "#2563eb",
+    borderRadius: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    marginBottom: 12,
+  },
+  requestButtonDisabled: {
+    backgroundColor: "#cbd5e1",
+  },
+  requestButtonText: {
+    color: "#fff",
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  message: {
+    fontSize: 12,
+    color: "#4338ca",
+    marginBottom: 12,
+    textAlign: "center",
   },
   row: {
     flexDirection: "row",

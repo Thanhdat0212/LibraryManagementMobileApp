@@ -9,4 +9,5 @@ public interface IBorrowRecordService
     Task<BorrowRecordDto?> GetByIdAsync(int id);
     Task<BorrowRecordDto> BorrowAsync(CreateBorrowRecordDto dto);
     Task<bool> ReturnAsync(int borrowRecordId);
+    Task<BorrowRecordDto> RenewAsync(int borrowRecordId);
 }

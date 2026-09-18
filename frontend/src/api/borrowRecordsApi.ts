@@ -10,4 +10,5 @@ export const borrowRecordsApi = {
     axiosClient.post<BorrowRecord>("/borrowrecords", data).then((res) => res.data),
   returnCopy: (id: number) =>
     axiosClient.post<{ message: string }>(`/borrowrecords/${id}/return`).then((res) => res.data),
+  renew: (id: number) => axiosClient.post<BorrowRecord>(`/borrowrecords/${id}/renew`).then((res) => res.data),
 };

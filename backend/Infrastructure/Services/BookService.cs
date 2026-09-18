@@ -1,4 +1,5 @@
 using Application.DTOs.Book;
+using Application.DTOs.Common;
 using Application.Interfaces;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
@@ -20,10 +21,16 @@ public class BookService : IBookService
         _mapper = mapper;
     }
 
-    public async Task<IEnumerable<BookDto>> GetAllAsync()
+    public async Task<PagedResult<BookDto>> GetAllAsync(BookQueryDto query)
     {
-        var books = await _bookRepository.GetAllWithDetailsAsync();
-        return _mapper.Map<IEnumerable<BookDto>>(books);
+        var (items, totalCount) = await _bookRepository.SearchAsync(query);
+        return new PagedResult<BookDto>
+        {
+            Items = _mapper.Map<IEnumerable<BookDto>>(items),
+            TotalCount = totalCount,
+            Page = query.Page,
+            PageSize = query.PageSize
+        };
     }
 
     public async Task<BookDto?> GetByIdAsync(int id)

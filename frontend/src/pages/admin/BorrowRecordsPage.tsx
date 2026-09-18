@@ -3,7 +3,7 @@ import { borrowRecordsApi } from "../../api/borrowRecordsApi";
 import { bookCopiesApi } from "../../api/bookCopiesApi";
 import { usersApi } from "../../api/usersApi";
 import { getErrorMessage } from "../../api/axiosClient";
-import type { BorrowRecord, BorrowStatus } from "../../types/borrowRecord";
+import type { BorrowRecord } from "../../types/borrowRecord";
 import type { BookCopy } from "../../types/bookCopy";
 import type { User } from "../../types/user";
 import Badge from "../../components/ui/Badge";
@@ -16,16 +16,7 @@ import Modal from "../../components/ui/Modal";
 import PageHeader from "../../components/ui/PageHeader";
 import Select from "../../components/ui/Select";
 import { formatDate } from "../../utils/formatDate";
-
-const statusTone: Record<BorrowStatus, "blue" | "green"> = {
-  Borrowing: "blue",
-  Returned: "green",
-};
-
-const statusLabel: Record<BorrowStatus, string> = {
-  Borrowing: "Đang mượn",
-  Returned: "Đã trả",
-};
+import { borrowStatusLabel, borrowStatusTone, effectiveBorrowStatus } from "../../utils/statusMeta";
 
 function defaultDueDate(): string {
   const d = new Date();
@@ -125,7 +116,13 @@ export default function BorrowRecordsPage() {
     { header: "Ngày mượn", render: (r) => formatDate(r.borrowDate) },
     { header: "Hạn trả", render: (r) => formatDate(r.dueDate) },
     { header: "Ngày trả", render: (r) => formatDate(r.returnDate) },
-    { header: "Trạng thái", render: (r) => <Badge tone={statusTone[r.status]}>{statusLabel[r.status]}</Badge> },
+    {
+      header: "Trạng thái",
+      render: (r) => {
+        const status = effectiveBorrowStatus(r);
+        return <Badge tone={borrowStatusTone[status]}>{borrowStatusLabel[status]}</Badge>;
+      },
+    },
     {
       header: "",
       className: "text-right",

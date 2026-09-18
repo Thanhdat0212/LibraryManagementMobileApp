@@ -13,6 +13,8 @@ public class BookDto
     public int CategoryId { get; set; }
     public string CategoryName { get; set; } = string.Empty;
     public List<string> AuthorNames { get; set; } = new();
+    public int TotalCopies { get; set; }
+    public int AvailableCopies { get; set; }
 }
 
 public class CreateBookDto

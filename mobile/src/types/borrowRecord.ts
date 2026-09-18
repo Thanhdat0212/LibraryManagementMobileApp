@@ -11,6 +11,7 @@ export interface BorrowRecord {
   dueDate: string;
   returnDate: string | null;
   status: BorrowStatus;
+  renewalCount: number;
 }
 
 export interface CreateBorrowRecordRequest {

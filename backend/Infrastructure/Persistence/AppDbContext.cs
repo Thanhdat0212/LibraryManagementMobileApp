@@ -17,6 +17,8 @@ public class AppDbContext : DbContext
     public DbSet<BookCopy> BookCopies => Set<BookCopy>();
     public DbSet<User> Users => Set<User>();
     public DbSet<BorrowRecord> BorrowRecords => Set<BorrowRecord>();
+    public DbSet<BorrowRequest> BorrowRequests => Set<BorrowRequest>();
+    public DbSet<Fine> Fines => Set<Fine>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {

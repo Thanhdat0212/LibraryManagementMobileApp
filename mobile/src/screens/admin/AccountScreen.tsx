@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   Pressable,
   RefreshControl,
@@ -18,6 +19,7 @@ export default function AccountScreen() {
   const [users, setUsers] = useState<LibraryUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [processingId, setProcessingId] = useState<number | null>(null);
 
   function load() {
     setLoading(true);
@@ -30,6 +32,22 @@ export default function AccountScreen() {
   }
 
   useEffect(load, []);
+
+  async function handleToggleLock(target: LibraryUser) {
+    setProcessingId(target.id);
+    try {
+      if (target.isLocked) {
+        await usersApi.unlock(target.id);
+      } else {
+        await usersApi.lock(target.id);
+      }
+      load();
+    } catch (err) {
+      Alert.alert("Lỗi", getErrorMessage(err, "Không cập nhật được trạng thái tài khoản."));
+    } finally {
+      setProcessingId(null);
+    }
+  }
 
   return (
     <View style={styles.container}>
@@ -56,8 +74,22 @@ export default function AccountScreen() {
             <View style={styles.userInfo}>
               <Text style={styles.userName}>{item.fullName}</Text>
               <Text style={styles.userEmail}>{item.email}</Text>
+              <Text style={[styles.userStatus, item.isLocked && styles.userStatusLocked]}>
+                {item.isLocked ? "Đã khóa" : "Hoạt động"}
+              </Text>
             </View>
             <Text style={styles.userRole}>{item.role === "Admin" ? "Admin" : "Member"}</Text>
+            {item.role === "Member" && (
+              <Pressable
+                style={[styles.lockButton, item.isLocked && styles.unlockButton]}
+                disabled={processingId === item.id}
+                onPress={() => handleToggleLock(item)}
+              >
+                <Text style={[styles.lockButtonText, item.isLocked && styles.unlockButtonText]}>
+                  {item.isLocked ? "Mở khóa" : "Khóa"}
+                </Text>
+              </Pressable>
+            )}
           </View>
         )}
       />
@@ -139,5 +171,32 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#374151",
     fontWeight: "600",
+    marginRight: 8,
+  },
+  userStatus: {
+    fontSize: 11,
+    color: "#16a34a",
+    marginTop: 2,
+  },
+  userStatusLocked: {
+    color: "#dc2626",
+  },
+  lockButton: {
+    borderWidth: 1,
+    borderColor: "#dc2626",
+    borderRadius: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  lockButtonText: {
+    color: "#dc2626",
+    fontSize: 11,
+    fontWeight: "600",
+  },
+  unlockButton: {
+    borderColor: "#16a34a",
+  },
+  unlockButtonText: {
+    color: "#16a34a",
   },
 });

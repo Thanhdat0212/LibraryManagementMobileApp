@@ -13,6 +13,9 @@ import PublishersPage from "./pages/admin/PublishersPage";
 import BooksPage from "./pages/admin/BooksPage";
 import BookCopiesPage from "./pages/admin/BookCopiesPage";
 import BorrowRecordsPage from "./pages/admin/BorrowRecordsPage";
+import BorrowRequestsPage from "./pages/admin/BorrowRequestsPage";
+import FinesPage from "./pages/admin/FinesPage";
+import DashboardPage from "./pages/admin/DashboardPage";
 import UsersPage from "./pages/admin/UsersPage";
 import CatalogPage from "./pages/member/CatalogPage";
 import MyBorrowsPage from "./pages/member/MyBorrowsPage";
@@ -28,12 +31,15 @@ export default function App() {
 
           <Route element={<ProtectedRoute allowedRoles={["Admin"]} />}>
             <Route path="/admin" element={<AdminLayout />}>
+              <Route path="dashboard" element={<DashboardPage />} />
               <Route path="books" element={<BooksPage />} />
               <Route path="book-copies" element={<BookCopiesPage />} />
               <Route path="authors" element={<AuthorsPage />} />
               <Route path="categories" element={<CategoriesPage />} />
               <Route path="publishers" element={<PublishersPage />} />
               <Route path="borrow-records" element={<BorrowRecordsPage />} />
+              <Route path="borrow-requests" element={<BorrowRequestsPage />} />
+              <Route path="fines" element={<FinesPage />} />
               <Route path="users" element={<UsersPage />} />
             </Route>
           </Route>

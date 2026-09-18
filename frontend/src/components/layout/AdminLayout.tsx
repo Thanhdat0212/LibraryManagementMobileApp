@@ -2,12 +2,15 @@ import { NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
 const navItems = [
+  { to: "/admin/dashboard", label: "Tổng quan" },
   { to: "/admin/books", label: "Sách" },
   { to: "/admin/book-copies", label: "Bản sao sách" },
   { to: "/admin/authors", label: "Tác giả" },
   { to: "/admin/categories", label: "Thể loại" },
   { to: "/admin/publishers", label: "Nhà xuất bản" },
   { to: "/admin/borrow-records", label: "Phiếu mượn" },
+  { to: "/admin/borrow-requests", label: "Yêu cầu mượn" },
+  { to: "/admin/fines", label: "Tiền phạt" },
   { to: "/admin/users", label: "Người dùng" },
 ];
 

@@ -5,4 +5,5 @@ export interface User {
   fullName: string;
   email: string;
   role: UserRole;
+  isLocked: boolean;
 }

@@ -16,7 +16,7 @@ export default function RegisterPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (user) {
-    return <Navigate to={user.role === "Admin" ? "/admin/books" : "/catalog"} replace />;
+    return <Navigate to={user.role === "Admin" ? "/admin/dashboard" : "/catalog"} replace />;
   }
 
   async function handleSubmit(e: FormEvent) {

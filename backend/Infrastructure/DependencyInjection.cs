@@ -27,6 +27,8 @@ public static class DependencyInjection
 
         services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
         services.Configure<CloudinarySettings>(configuration.GetSection("Cloudinary"));
+        services.Configure<BorrowPolicySettings>(configuration.GetSection("BorrowPolicy"));
+        services.Configure<FineSettings>(configuration.GetSection("FineSettings"));
 
         services.AddScoped<IRepository<Author>, Repository<Author>>();
         services.AddScoped<IRepository<Publisher>, Repository<Publisher>>();
@@ -36,6 +38,8 @@ public static class DependencyInjection
         services.AddScoped<IBookCopyRepository, BookCopyRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IBorrowRecordRepository, BorrowRecordRepository>();
+        services.AddScoped<IBorrowRequestRepository, BorrowRequestRepository>();
+        services.AddScoped<IFineRepository, FineRepository>();
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
@@ -45,6 +49,9 @@ public static class DependencyInjection
         services.AddScoped<IBookService, BookService>();
         services.AddScoped<IBookCopyService, BookCopyService>();
         services.AddScoped<IBorrowRecordService, BorrowRecordService>();
+        services.AddScoped<IBorrowRequestService, BorrowRequestService>();
+        services.AddScoped<IFineService, FineService>();
+        services.AddScoped<IDashboardService, DashboardService>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<ICloudinaryService, CloudinaryService>();

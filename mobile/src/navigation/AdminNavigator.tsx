@@ -4,6 +4,8 @@ import DashboardScreen from "../screens/admin/DashboardScreen";
 import BooksScreen from "../screens/admin/BooksScreen";
 import BookCopiesScreen from "../screens/admin/BookCopiesScreen";
 import BorrowRecordsScreen from "../screens/admin/BorrowRecordsScreen";
+import BorrowRequestsScreen from "../screens/admin/BorrowRequestsScreen";
+import FinesScreen from "../screens/admin/FinesScreen";
 import CatalogManagementScreen from "../screens/admin/CatalogManagementScreen";
 import AccountScreen from "../screens/admin/AccountScreen";
 
@@ -27,6 +29,24 @@ function BooksNavigator() {
   );
 }
 
+export type BorrowOperationsStackParamList = {
+  BorrowRecordsList: undefined;
+  BorrowRequests: undefined;
+  Fines: undefined;
+};
+
+const BorrowOperationsStack = createNativeStackNavigator<BorrowOperationsStackParamList>();
+
+function BorrowOperationsNavigator() {
+  return (
+    <BorrowOperationsStack.Navigator>
+      <BorrowOperationsStack.Screen name="BorrowRecordsList" component={BorrowRecordsScreen} options={{ title: "Mượn trả" }} />
+      <BorrowOperationsStack.Screen name="BorrowRequests" component={BorrowRequestsScreen} options={{ title: "Yêu cầu mượn" }} />
+      <BorrowOperationsStack.Screen name="Fines" component={FinesScreen} options={{ title: "Tiền phạt" }} />
+    </BorrowOperationsStack.Navigator>
+  );
+}
+
 export type AdminTabParamList = {
   Dashboard: undefined;
   Books: undefined;
@@ -42,7 +62,7 @@ export default function AdminNavigator() {
     <Tab.Navigator screenOptions={{ headerShown: true }}>
       <Tab.Screen name="Dashboard" component={DashboardScreen} options={{ title: "Tổng quan" }} />
       <Tab.Screen name="Books" component={BooksNavigator} options={{ title: "Sách", headerShown: false }} />
-      <Tab.Screen name="BorrowRecords" component={BorrowRecordsScreen} options={{ title: "Mượn trả" }} />
+      <Tab.Screen name="BorrowRecords" component={BorrowOperationsNavigator} options={{ title: "Mượn trả", headerShown: false }} />
       <Tab.Screen
         name="CatalogManagement"
         component={CatalogManagementScreen}

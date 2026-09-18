@@ -5,4 +5,6 @@ namespace Application.Interfaces.Services;
 public interface IUserService
 {
     Task<IEnumerable<UserDto>> GetAllAsync();
+    Task<bool> SetLockedAsync(int id, bool isLocked);
+    Task<bool> ChangeRoleAsync(int id, UpdateUserRoleDto dto);
 }

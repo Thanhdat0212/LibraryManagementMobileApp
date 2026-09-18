@@ -10,6 +10,18 @@ export interface Book {
   categoryId: number;
   categoryName: string;
   authorNames: string[];
+  totalCopies: number;
+  availableCopies: number;
+}
+
+export interface BookQuery {
+  search?: string;
+  categoryId?: number;
+  authorId?: number;
+  publisherId?: number;
+  onlyAvailable?: boolean;
+  page?: number;
+  pageSize?: number;
 }
 
 export interface CreateBookRequest {
