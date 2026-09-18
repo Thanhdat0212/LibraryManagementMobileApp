@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { usersApi } from "../../api/usersApi";
 import { getErrorMessage } from "../../api/axiosClient";
+import { useAuth } from "../../context/AuthContext";
 import type { User } from "../../types/user";
 import Badge from "../../components/ui/Badge";
 import Button from "../../components/ui/Button";
@@ -9,6 +10,7 @@ import ErrorBanner from "../../components/ui/ErrorBanner";
 import PageHeader from "../../components/ui/PageHeader";
 
 export default function UsersPage() {
+  const { user: currentUser } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -57,17 +59,24 @@ export default function UsersPage() {
     {
       header: "",
       className: "text-right",
-      render: (u) => (
-        <div className="flex justify-end gap-2">
-          <Button
-            variant={u.isLocked ? "secondary" : "danger"}
-            isLoading={processingId === u.id}
-            onClick={() => handleToggleLock(u)}
-          >
-            {u.isLocked ? "Mở khóa" : "Khóa"}
-          </Button>
-        </div>
-      ),
+      render: (u) => {
+        const isSelf = u.email === currentUser?.email;
+        if (isSelf && !u.isLocked) {
+          // Không cho tự khóa chính mình (backend cũng chặn) — ẩn luôn nút để tránh gây hiểu nhầm.
+          return <span className="text-xs text-slate-400">Tài khoản của bạn</span>;
+        }
+        return (
+          <div className="flex justify-end gap-2">
+            <Button
+              variant={u.isLocked ? "secondary" : "danger"}
+              isLoading={processingId === u.id}
+              onClick={() => handleToggleLock(u)}
+            >
+              {u.isLocked ? "Mở khóa" : "Khóa"}
+            </Button>
+          </div>
+        );
+      },
     },
   ];
 

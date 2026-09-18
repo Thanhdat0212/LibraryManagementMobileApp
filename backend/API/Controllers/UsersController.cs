@@ -1,3 +1,5 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -22,9 +24,16 @@ public class UsersController : ControllerBase
 
     [HttpPut("{id:int}/lock")]
     public async Task<IActionResult> Lock(int id) =>
-        await _userService.SetLockedAsync(id, true) ? NoContent() : NotFound();
+        await _userService.SetLockedAsync(id, true, GetCurrentUserId()) ? NoContent() : NotFound();
 
     [HttpPut("{id:int}/unlock")]
     public async Task<IActionResult> Unlock(int id) =>
-        await _userService.SetLockedAsync(id, false) ? NoContent() : NotFound();
+        await _userService.SetLockedAsync(id, false, GetCurrentUserId()) ? NoContent() : NotFound();
+
+    private int GetCurrentUserId()
+    {
+        var value = User.FindFirstValue(ClaimTypes.NameIdentifier)
+            ?? User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+        return int.Parse(value!);
+    }
 }

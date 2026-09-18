@@ -72,6 +72,9 @@ public class AuthService : IAuthService
         if (user == null || !_passwordHasher.Verify(dto.Password, user.PasswordHash))
             return null;
 
+        if (user.IsLocked)
+            throw new InvalidOperationException("Tài khoản của bạn đã bị khóa. Vui lòng liên hệ thủ thư.");
+
         return new AuthResponseDto
         {
             Token = _jwtService.GenerateToken(user),
